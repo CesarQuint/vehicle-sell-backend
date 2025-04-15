@@ -260,9 +260,7 @@ export class PuppeterService {
 
       await this.nextPage();
 
-      await this.page.screenshot({ path: 'after-login.png' });
-
-      return this.page;
+      await this.page.screenshot({ path: 'vehicle-post.png' });
     } catch (error) {
       throw new NotAcceptableException(error);
     } finally {
