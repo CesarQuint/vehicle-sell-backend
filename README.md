@@ -17,7 +17,7 @@ This is a backend application built with **NestJS** that automates the posting o
 
 ```bash
 git clone https://github.com/CesarQuint/vehicle-sell-backend.git
-cd vehicle-posting-backend
+cd vehicle-sell-backend
 npm install
 ```
 
