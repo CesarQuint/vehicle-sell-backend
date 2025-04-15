@@ -23,6 +23,8 @@ npm install
 
 ### Running the App
 
+Add env variables
+
 ```bash
 npm run start:dev
 ```
