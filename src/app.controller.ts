@@ -4,12 +4,12 @@ import {
   Post,
   UploadedFiles,
   UseInterceptors,
+  Res,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
 import { AppService } from './app.service';
 import { PostVehicleDto } from './dto/post-vehicle.dto';
+import { Response } from 'express';
 
 @Controller()
 export class AppController {
@@ -18,9 +18,10 @@ export class AppController {
   @Post('vehicle')
   @UseInterceptors(FilesInterceptor('images', 3))
   postVehicle(
+    @Res({ passthrough: true }) res: Response,
     @Body() dto: PostVehicleDto,
     @UploadedFiles() images: Express.Multer.File[],
   ) {
-    return this.appService.getHello(dto, images);
+    return this.appService.postVehicle(res, dto, images);
   }
 }
