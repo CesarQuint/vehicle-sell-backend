@@ -11,10 +11,10 @@ export class AppService {
   async postVehicle(
     res: Response,
     postVehicleDto: PostVehicleDto,
-    images: Express.Multer.File[],
+    // images: Express.Multer.File[],
   ) {
     try {
-      await this.puppeterService.postVehicle(postVehicleDto, images);
+      await this.puppeterService.postVehicle(postVehicleDto);
 
       const filePath = join(process.cwd(), 'vehicle-post.png');
 

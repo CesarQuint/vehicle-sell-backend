@@ -16,67 +16,68 @@ enum TransactionType {
 }
 
 export class PostVehicleDto {
-  @IsEnum(VehicleType)
-  @IsNotEmpty()
-  type: VehicleType;
+  //* Other fields left to show  use case.
+  // @IsEnum(VehicleType)
+  // @IsNotEmpty()
+  // type: VehicleType;
 
-  @IsString()
-  @IsNotEmpty()
-  brand: string;
+  // @IsString()
+  // @IsNotEmpty()
+  // brand: string;
 
-  @IsString()
-  @IsNotEmpty()
-  model: string;
+  // @IsString()
+  // @IsNotEmpty()
+  // model: string;
 
-  @IsString()
-  @IsNotEmpty()
-  subtype: string;
+  // @IsString()
+  // @IsNotEmpty()
+  // subtype: string;
 
-  @IsString()
-  @IsNotEmpty()
-  year: number;
+  // @IsString()
+  // @IsNotEmpty()
+  // year: number;
 
-  @IsString()
-  @IsNotEmpty()
-  vertion: string;
+  // @IsString()
+  // @IsNotEmpty()
+  // vertion: string;
 
-  @IsString()
-  @IsNotEmpty()
-  color: string;
+  // @IsString()
+  // @IsNotEmpty()
+  // color: string;
 
-  @IsString()
-  @IsNotEmpty()
-  zipcode: string;
+  // @IsString()
+  // @IsNotEmpty()
+  // zipcode: string;
 
-  @IsString()
-  @IsNotEmpty()
-  state: string;
+  // @IsString()
+  // @IsNotEmpty()
+  // state: string;
 
-  @IsString()
-  @IsNotEmpty()
-  city: string;
+  // @IsString()
+  // @IsNotEmpty()
+  // city: string;
 
-  @IsNumberString()
-  @IsNotEmpty()
-  mileage: string;
+  // @IsNumberString()
+  // @IsNotEmpty()
+  // mileage: string;
+
+  // @IsEnum(TransactionType)
+  // @IsNotEmpty()
+  // transaction: TransactionType;
+
+  // @IsEnum(PackageType)
+  // @IsNotEmpty()
+  // package: PackageType;
+
+  // @IsString()
+  // @IsNotEmpty()
+  // phonenumber: string;
 
   @IsNumberString()
   @IsNotEmpty()
   price: string;
 
-  @IsEnum(TransactionType)
-  @IsNotEmpty()
-  transaction: TransactionType;
-
   @IsString()
   @IsNotEmpty()
   description: string;
-
-  @IsEnum(PackageType)
-  @IsNotEmpty()
-  package: PackageType;
-
-  @IsString()
-  @IsNotEmpty()
-  phonenumber: string;
 }

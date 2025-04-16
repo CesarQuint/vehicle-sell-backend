@@ -4,6 +4,63 @@ import * as puppeteer from 'puppeteer';
 import { PostVehicleDto } from 'src/dto/post-vehicle.dto';
 import * as fs from 'fs';
 import * as tmp from 'tmp';
+import * as path from 'path';
+
+const template = {
+  type: 'autos',
+  brand: 'Acura',
+  model: 'ILX',
+  subtype: 'Sedán',
+  year: '2018',
+  state: 'Nuevo León',
+  city: 'Monterrey',
+  mileage: '20000 kms',
+  transaction: 'Negociable',
+  packages: 'Free',
+  vertion: '2.4 Tech At',
+  color: 'negro',
+  zipcode: '64000',
+  phonenumber: '6706029412',
+};
+
+const loadImagesFromStaticFolder = async (): Promise<Express.Multer.File[]> => {
+  const imagesDir = path.join(process.cwd(), 'images');
+
+  const imageFilenames = ['image_1.jpg', 'image_2.jpg', 'image_3.jpg'];
+  const files: Express.Multer.File[] = [];
+
+  for (const filename of imageFilenames) {
+    const imagePath = path.join(imagesDir, filename);
+
+    try {
+      if (!fs.existsSync(imagePath)) {
+        console.error(`File does not exist: ${imagePath}`);
+        continue;
+      }
+
+      const buffer = await fs.promises.readFile(imagePath);
+
+      const file: Express.Multer.File = {
+        fieldname: 'images',
+        originalname: filename,
+        encoding: '7bit',
+        mimetype: 'image/jpeg',
+        buffer: buffer,
+        size: buffer.length,
+        destination: '',
+        filename: '',
+        path: imagePath,
+        stream: null as any,
+      };
+
+      files.push(file);
+    } catch (error) {
+      console.error(`Failed to load image ${filename}:`, error);
+    }
+  }
+
+  return files;
+};
 
 @Injectable()
 export class PuppeterService {
@@ -40,16 +97,68 @@ export class PuppeterService {
     ]);
   };
 
-  private nextPage = async () =>
-    Promise.all([
-      this.page.waitForNavigation({ waitUntil: 'networkidle2' }),
-      this.page.evaluate(() => {
+  private nextPage = async () => {
+    try {
+      await this.page.evaluate(() => {
         const button = Array.from(document.querySelectorAll('button')).find(
           (el) => el.textContent?.includes('Siguiente'),
         );
         if (button) button.click();
-      }),
-    ]);
+      });
+
+      const modalAppeared = await this.page
+        .waitForSelector('[id^="headlessui-dialog-panel"]', {
+          timeout: 2000,
+          visible: true,
+        })
+        .then(() => true)
+        .catch(() => false);
+
+      if (modalAppeared) {
+        await this.page.evaluate(() => {
+          const continueButton = Array.from(
+            document.querySelectorAll('button'),
+          ).find((el) => el.textContent?.trim() === 'Continuar');
+          if (continueButton) continueButton.click();
+        });
+      }
+
+      await this.page.waitForNavigation({
+        waitUntil: 'networkidle2',
+        timeout: 5000,
+      });
+    } catch (error) {
+      const currentUrl = this.page.url();
+      console.log(`Current URL: ${currentUrl}`);
+
+      const isOnNextPage = await this.checkIfOnNextPage();
+      if (isOnNextPage) return;
+
+      try {
+        await this.page.evaluate(() => {
+          const button = Array.from(document.querySelectorAll('button')).find(
+            (el) => el.textContent?.includes('Siguiente'),
+          );
+          if (button) button.click();
+        });
+
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+      } catch (secondError) {
+        throw new Error('Navigation failed after multiple attempts');
+      }
+    }
+  };
+
+  private checkIfOnNextPage = async (): Promise<boolean> => {
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      const nextPageIndicator = await this.page.$('input[type="file"]');
+      return nextPageIndicator !== null;
+    } catch {
+      return false;
+    }
+  };
 
   private async selectDropdownByLabel(
     label: string,
@@ -178,7 +287,10 @@ export class PuppeterService {
     await this.nextPage();
   };
 
-  postVehicle = async (data: PostVehicleDto, images: Express.Multer.File[]) => {
+  postVehicle = async (
+    data: PostVehicleDto,
+    //  images: Express.Multer.File[]
+  ) => {
     try {
       await this.launch();
 
@@ -212,19 +324,19 @@ export class PuppeterService {
 
       await this.page.waitForNavigation({ waitUntil: 'networkidle2' });
 
-      await this.selectDropdownByLabel('Marca', data.brand);
-      await this.selectDropdownByLabel('Modelo', data.model);
-      await this.selectDropdownByLabel('Año', data.year.toString());
-      await this.selectDropdownByLabel('Versión', data.vertion.toString());
-      await this.selectDropdownByLabel('Subtipo', data.subtype);
-      await this.selectDropdownByLabel('Color', data.color);
+      await this.selectDropdownByLabel('Marca', template.brand);
+      await this.selectDropdownByLabel('Modelo', template.model);
+      await this.selectDropdownByLabel('Año', template.year);
+      await this.selectDropdownByLabel('Versión', template.vertion);
+      await this.selectDropdownByLabel('Subtipo', template.subtype);
+      await this.selectDropdownByLabel('Color', template.color);
       await this.selectDropdownByLabel(
         'Código Postal',
-        data.zipcode,
+        template.zipcode,
         'api.seminuevos.com/v1/core/postal-codes',
       );
-      await this.selectDropdownByLabel('Ciudad del vehículo', data.city);
-      await this.selectDropdownByLabel('Recorrido', data.mileage);
+      await this.selectDropdownByLabel('Ciudad del vehículo', template.city);
+      await this.selectDropdownByLabel('Recorrido', template.mileage);
       await this.selectDropdownByLabel('Precio', data.price);
 
       await this.page.evaluate((labelText) => {
@@ -239,11 +351,27 @@ export class PuppeterService {
         }
 
         match.click();
-      }, data.transaction);
+      }, template.transaction);
+
+      await this.page.evaluate((labelText) => {
+        const labels = Array.from(document.querySelectorAll('label'));
+        const match = labels.find(
+          (el) =>
+            el.textContent?.trim().toLowerCase() === labelText.toLowerCase(),
+        );
+
+        if (!match) {
+          throw new Error(`No radio label found with text "${labelText}"`);
+        }
+
+        match.click();
+      }, template.transaction);
 
       await this.nextPage();
 
-      await this.uploadImagesAndDescription(data.description, images);
+      const imageFiles = await loadImagesFromStaticFolder();
+
+      await this.uploadImagesAndDescription(data.description, imageFiles);
 
       await page.evaluate((phoneNumber) => {
         const phoneLabel = Array.from(document.querySelectorAll('label')).find(
@@ -256,7 +384,7 @@ export class PuppeterService {
             (input as HTMLInputElement).value = phoneNumber;
           }
         }
-      }, data.phonenumber);
+      }, template.phonenumber);
 
       await this.nextPage();
 

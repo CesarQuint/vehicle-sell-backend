@@ -20,8 +20,8 @@ export class AppController {
   postVehicle(
     @Res({ passthrough: true }) res: Response,
     @Body() dto: PostVehicleDto,
-    @UploadedFiles() images: Express.Multer.File[],
+    // @UploadedFiles() images: Express.Multer.File[],
   ) {
-    return this.appService.postVehicle(res, dto, images);
+    return this.appService.postVehicle(res, dto);
   }
 }
