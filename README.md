@@ -43,24 +43,9 @@ This endpoint accepts vehicle information and images, processes them using Puppe
 
 ##### Fields
 
-| Name          | Type   | Description                              |
-| ------------- | ------ | ---------------------------------------- |
-| `images`      | File[] | Up to 3 vehicle images                   |
-| `type`        | string | Vehicle type: `Car` or `Other`           |
-| `brand`       | string | Vehicle brand                            |
-| `model`       | string | Vehicle model                            |
-| `subtype`     | string | Subtype (e.g., SUV, Sedan)               |
-| `year`        | number | Year of manufacture                      |
-| `vertion`     | string | Version or trim                          |
-| `color`       | string | Vehicle color                            |
-| `zipcode`     | string | Zip code of location                     |
-| `state`       | string | State                                    |
-| `city`        | string | City                                     |
-| `mileage`     | string | Mileage in kilometers                    |
-| `price`       | string | Price in local currency                  |
-| `transaction` | string | Transaction type: `Fijo` or `Negociable` |
-| `description` | string | Description of the vehicle               |
-| `package`     | string | Listing type: `Free` or `Top`            |
-| `phonenumber` | string | Contact phone number                     |
+| Name          | Type   | Description                |
+| ------------- | ------ | -------------------------- |
+| `price`       | string | Price in local currency    |
+| `description` | string | Description of the vehicle |
 
 ---
